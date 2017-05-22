@@ -57,6 +57,9 @@ starteSpiel <- function(iter_number, matrix_size, save_path) {
     save(M, save_path, i)
   }
 }
-
+#------Test-----
+N=createMatrix(3)
+computeIsAlive(N)
+#------Test-----
 # Spiel starten: 
 # starteSpiel(1000, 300, '..blabla');
