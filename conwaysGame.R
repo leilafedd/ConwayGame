@@ -46,6 +46,8 @@ createMatrix <- function(matrix_size) {
   # eine quadr. Matrix von gegebener Größe erstellen
   # Matrix mit zufälligen Werten (0 oder 1) füllen
   # return M (matrix_size x matrix_size)
+  matrix = replicate(matrix_size,sample(c(0,1),matrix_size,replace = TRUE ,c(0.5,0.5)))
+  return(matrix)
 }
 
 
