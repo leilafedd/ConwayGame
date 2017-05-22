@@ -15,6 +15,29 @@ computeIsAlive <- function(N) {
   # gegeben 3x3 Nachbarmatrix für ein Wert
   # Regeln des Spiels implementieren
   # return 0(Tot) oder 1(Lebend)
+    alive<-0
+  for ( i in 1:3 )
+  {
+    for(j in 1:3)
+    {
+      if(N[i,j]== 1) alive<-alive+1
+        
+    }
+  }
+  
+  if(N[2,2]==1)
+  {
+    alive <- alive-1
+    if(alive<2 || alive>3) {return(0)}
+    else
+    {
+    if(alive==2 || alive==3) return(1)
+    }
+  }
+  if(N[2,2]==0)
+  {
+    if(alive==3) return(1)
+  }
 }
 
 
@@ -46,6 +69,7 @@ createMatrix <- function(matrix_size) {
   # eine quadr. Matrix von gegebener Größe erstellen
   # Matrix mit zufälligen Werten (0 oder 1) füllen
   # return M (matrix_size x matrix_size)
+  
 }
 
 
