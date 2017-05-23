@@ -15,6 +15,29 @@ computeIsAlive <- function(N) {
   # gegeben 3x3 Nachbarmatrix für ein Wert
   # Regeln des Spiels implementieren
   # return 0(Tot) oder 1(Lebend)
+    alive<-0
+  for ( i in 1:3 )
+  {
+    for(j in 1:3)
+    {
+      if(N[i,j]== 1) alive<-alive+1
+        
+    }
+  }
+  
+  if(N[2,2]==1)
+  {
+    alive <- alive-1
+    if(alive<2 || alive>3) {return(0)}
+    else
+    {
+    if(alive==2 || alive==3) return(1)
+    }
+  }
+  if(N[2,2]==0)
+  {
+    if(alive==3) return(1)
+  }
 }
 
 
@@ -23,6 +46,7 @@ computeAll <- function(M, save_path) {
   # TODO: iteriere über alle MAtrix elemente
   # berechne die Nachbar-Matrix N = getNeighbours(M, i, j)
   # rufe computeIsAlive(N) auf
+  # rufe M(i,j)=computeIsAlive(N) auf ???
 }
 
 visualise <- function(M) {
@@ -59,6 +83,9 @@ starteSpiel <- function(iter_number, matrix_size, save_path) {
     save(M, save_path, i)
   }
 }
-
+#------Test-----
+N=createMatrix(3)
+computeIsAlive(N)
+#------Test-----
 # Spiel starten: 
 # starteSpiel(1000, 300, '..blabla');
