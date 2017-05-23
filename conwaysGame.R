@@ -46,6 +46,7 @@ computeAll <- function(M, save_path) {
   # TODO: iteriere über alle MAtrix elemente
   # berechne die Nachbar-Matrix N = getNeighbours(M, i, j)
   # rufe computeIsAlive(N) auf
+  # rufe M(i,j)=computeIsAlive(N) auf ???
 }
 
 visualise <- function(M) {
