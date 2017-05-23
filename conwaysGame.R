@@ -1,13 +1,13 @@
-getNeighbours <- function(M, i, j) {
-  # Selina
-  # TODO: finde Nachbarn von M(i,j)
-  # Beachte den Randfall: bsp. für linke obere Ecke:
-  # Nachbar oben: von unten
-  # Nachbar links: von rechts
-  # Nachbar oben links: von rechts unten
-  
-  # return 3x3 Matrix (M(i,j) in der Mitte und seine Nachbarn)
-}
+# getNeighbours <- function(M, i, j) {
+#   # Selina
+#   # TODO: finde Nachbarn von M(i,j)
+#   # Beachte den Randfall: bsp. für linke obere Ecke:
+#   # Nachbar oben: von unten
+#   # Nachbar links: von rechts
+#   # Nachbar oben links: von rechts unten
+#   
+#   # return 3x3 Matrix (M(i,j) in der Mitte und seine Nachbarn)
+# }
 
 computeIsAlive <- function(N) {
   # Leila
@@ -38,16 +38,19 @@ computeIsAlive <- function(N) {
   {
     if(alive==3) return(1)
   }
+    return(0)
 }
 
 
-computeAll <- function(M, save_path) {
+#computeAll <- function(M) {
   # Selina
   # TODO: iteriere über alle MAtrix elemente
   # berechne die Nachbar-Matrix N = getNeighbours(M, i, j)
   # rufe computeIsAlive(N) auf
   # rufe M(i,j)=computeIsAlive(N) auf ???
-}
+  
+  # save_path
+#}
 
 visualise <- function(M) {
   # Ana
@@ -84,8 +87,9 @@ starteSpiel <- function(iter_number, matrix_size, save_path) {
   }
 }
 #------Test-----
-N=createMatrix(3)
-computeIsAlive(N)
+M=createMatrix(12)
+#computeIsAlive(N)
+M.updated <-computeAll(M)
 #------Test-----
 # Spiel starten: 
 # starteSpiel(1000, 300, '..blabla');
