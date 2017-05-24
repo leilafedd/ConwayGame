@@ -1,0 +1,20 @@
+Protokoll (Sitzung: 24.05.2017)
+
+- Gemacht: Zusammenführen von Funktionen
+- Fix
+- Spiel des Lebens zum Laufen gebracht
+
+
+TODOs bis zum 31.05.2017:
+
+Jede implementiert eigene Funktion zum Erkennen von still life (eventuell auch oszillators).
+
+Implementierungsvorschlag:
+
+1) Eine Suchmaske für Muster erstellen. Die Matrix iterativ durchlaufen und mit der Maske absuchen.
+
+2) Jeder Muster hat eine Periode, in der sich der Muster wiederholt. Bei Still Life ist Periode = 1. Bei Oszillatoren/Gliders ist Periode >1 und es werden mehrere Suchmasken für jede Laufphase gebraucht
+
+3) Für erkennen der nächsten Periodephase ist die Position der Maske relevant, sie muss irgendwo gespeichert werden.
+Bei Glider ändert sich die Position der Maske, und muss entsprechend berechnet werden.
+
