@@ -57,14 +57,19 @@ visualise <- function(M) {
   # TODO: die Matrix als Plot in R anzeigen
   # achte auf korrekte Orientierung
   # bzw. Farbwerte
+  img <- image(z=t(apply(M, 2, rev)), axes=FALSE,
+               zlim=c(0,1), lwd=2,
+               col=grey(seq(1,0, length=256)))
+  return(img)
 }
-
 
 save <- function(M, save_path, iter_id) {
   # Ana
   # TODO:
   # speichere aktuelle Matrix als .png? unter save_path
   # in dem Namen Iterationszahl
+  dev.copy(png, sprintf('%s/cgofl_%s.png', save_path, iter_id), width=500, height=500, units="px")
+  dev.off()
 }
 
 createMatrix <- function(matrix_size) {
