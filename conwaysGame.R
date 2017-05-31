@@ -123,14 +123,20 @@ computeAll <- function(M) {
 
 
 visualise <- function(M) {
+  # install.packages(plotrix)
+  library(plotrix)
   # Ana
   # TODO: die Matrix als Plot in R anzeigen
   # achte auf korrekte Orientierung
   # bzw. Farbwerte
-  img <- image(z=t(apply(M, 2, rev)), axes=FALSE,
-               zlim=c(0,1), lwd=2,
-               col=grey(seq(1,0, length=256)))
-  #return(img)
+  cellcol <- M
+  cellcol[which(M == 0)] = 'white'
+  cellcol[which(M == 1)] = 'black'
+  
+  # TODO: more colors for different patterns?
+  cellcol[which(M > 1)] = 'red'
+  #### weitere farben hier zu ergänzen
+  color2D.matplot(M, cellcolors = cellcol, border=NA)
 }
 
 save <- function(M, save_path, iter_id) {
@@ -152,20 +158,85 @@ createMatrix <- function(matrix_size) {
   return(matrix)
 }
 
+decolorM <- function(M) {
+  M[which(M >0)] = 1;
+  return(M);
+}
+
+
+# findPatternMatch from Ana
+findPatternMatch <- function(M, pattern, colNum) {
+  location = matrix(, ncol=2)
+  for (i in 1:(nrow(M)-nrow(pattern)-1)) {
+    for (j in 1:(ncol(M)-ncol(pattern)-1)) {
+      subM = M[i:(i-1+nrow(pattern)), j:(j-1+ncol(pattern))];
+      if (identical(subM,pattern)) {
+        subM[which(subM == 1)] = colNum
+        M[i:(i-1+nrow(pattern)), j:(j-1+ncol(pattern))] = subM;
+      }
+    }
+  }
+  return(M)
+}
+
+# TODO: findPatternMatch_2 from Leila
+
+load.masks <- function(path) {
+  # TODO Selina:
+    #lese die Datei aus
+    # bsp:
+    # #45fe00
+    # 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
+  
+  # RETURN: creature
+  # creature.patterns = eine Matrix der Größe MxMxN, M - Patterngröße, N - Anzahl Patterns
+  # creature.color = #45fe00
+}
+
+getPatterns <- function(paths) {
+  # TODO: Leila
+  # TODO: für alle paths creatures auslesen und als vector von objekten zurückgeben
+  for (i in 1:length(paths)) {
+    # load.masks(paths(i))
+  }
+}
+
+detectPatterns <- function(M, creatures) {
+  # TODO Ana
+  for (i in 1:length(creatures)) {
+   # for (j in 1:length(creatures[i].patterns)) {
+      #M = findPatternMatch(M, creatures[i].patterns[j], creatures[i].color);  
+    }
+   # }
+  return(M)
+}
 
 starteSpiel <- function(iter_number, matrix_size, save_path) {
   M <- createMatrix(matrix_size)
   for (i in c(1:iter_number)) { # check if for-Loop correct
+    # prüfe wer überlebt hat und update
     M <- computeAll(M)
-    visualise(M)
-    Sys.sleep(1)
-    if (i%%5 == 0) {
+    
+    # TODO:
+    # finde und färbe patterns
+    M = detectPatterns(M, getPatterns())
+    
+    # zeige M
+    visualise(M);
+    Sys.sleep(1);
+    
+    # speichere M if nötig
+    if (i%%1 == 0) {
       save(M, save_path, i)
     }
+    
+    # setzte M zurück (= entfärben)
+    M = decolorM(M);
+    
   }
 }
 #------Test-----
-M=createMatrix(3)
+M=createMatrix(10)
 visualise(M)
  #computeIsAlive(N)
 M.updated <-computeAll(M)
@@ -174,4 +245,4 @@ visualise(M.updated)
 # Spiel starten: 
 # starteSpiel(1000, 300, '..blabla');
 save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
-starteSpiel(100, 100, save_path)
+starteSpiel(10, 100, save_path)
