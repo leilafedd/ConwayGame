@@ -1,12 +1,6 @@
 getNeighbours <- function(M, i,j) {
-  # Selina
-  # TODO: finde Nachbarn von M(i,j)
-  # Beachte den Randfall: bsp. für linke obere Ecke:
-  # Nachbar oben: von unten
-  # Nachbar links: von rechts
-  # Nachbar oben links: von rechts unten
+  # return 3x3 Matrix (M(i,j) in der Mitte und seine Nachbarn
   
-  # return 3x3 Matrix (M(i,j) in der Mitte und seine Nachbarn)
   ncM <- ncol(M)
   #nrow == ncol, da es eine quadratische Matrix ist
   #nrM <- nrow(M)
@@ -64,10 +58,6 @@ computeIsAlive2 <- function(N) {
 }
 
 computeIsAlive <- function(N) {
-  # Leila
-  # TODO: 
-  # gegeben 3x3 Nachbarmatrix für ein Wert
-  # Regeln des Spiels implementieren
   # return 0(Tot) oder 1(Lebend)
     alive<-0
   for ( i in 1:3 )
@@ -97,13 +87,6 @@ computeIsAlive <- function(N) {
 
 
 computeAll <- function(M) {
-  # Selina
-  # TODO: iteriere über alle MAtrix elemente
-  # berechne die Nachbar-Matrix N = getNeighbours(M, i, j)
-  # rufe computeIsAlive(N) auf
-  # rufe M(i,j)=computeIsAlive(N) auf
-  
-  # save_path???
   R <- matrix(data=0, ncol=ncol(M), nrow=nrow(M))
   
   #a<-apply(N, MARGIN=c(1,2), function(x) x + 2)
@@ -122,37 +105,27 @@ computeAll <- function(M) {
 }
 
 
-visualise <- function(M) {
-  # install.packages(plotrix)
-  library(plotrix)
-  # Ana
-  # TODO: die Matrix als Plot in R anzeigen
-  # achte auf korrekte Orientierung
-  # bzw. Farbwerte
-  cellcol <- M
-  cellcol[which(M == 0)] = 'white'
-  cellcol[which(M == 1)] = 'black'
-  
-  # TODO: more colors for different patterns?
-  cellcol[which(M > 1)] = 'red'
-  #### weitere farben hier zu ergänzen
+visualise <- function(M, colorMapping) {
+  tryCatch({
+    library(plotrix)
+  }, error = function(e) {
+    install.packages("plotrix")
+    library(plotrix)
+  })
+
+  cellcol <- array(, dim=dim(M))
+  for (i in 1:dim(colorMapping)[1]) {
+    cellcol[which(M == colorMapping$num[i])] <- colorMapping$col[i]
+  }
   color2D.matplot(M, cellcolors = cellcol, border=NA)
 }
 
 save <- function(M, save_path, iter_id) {
-  # Ana
-  # TODO:
-  # speichere aktuelle Matrix als .png? unter save_path
-  # in dem Namen Iterationszahl
   dev.copy(png, sprintf('%s/cgofl_%s.png', save_path, iter_id), width=500, height=500, units="px")
   dev.off()
 }
 
 createMatrix <- function(matrix_size) {
-  # Leila
-  # TODO:
-  # eine quadr. Matrix von gegebener Größe erstellen
-  # Matrix mit zufälligen Werten (0 oder 1) füllen
   # return M (matrix_size x matrix_size)visualise(M)
   matrix = replicate(matrix_size,sample(c(0,1),matrix_size,replace = TRUE ,c(0.5,0.5)))
   return(matrix)
@@ -191,38 +164,57 @@ load.masks <- function(path) {
   # RETURN: creature
   # creature.patterns = eine Matrix der Größe MxMxN, M - Patterngröße, N - Anzahl Patterns
   # creature.color = #45fe00
+  
+  # ---------------------------- FOR TESTS -------------------------------------------------------------
+  # -------------------- Remove after implementing -----------------------------------------------------
+  tryCatch({
+    library(abind)  
+  }, error = function(e){
+    install.packages("abind")
+    library(abind)
+  })
+  
+  pattern1 = array(c(0,0,0,0,0, 0,0,1,0,0, 0,0,1,0,0, 0,0,1,0,0, 0,0,0,0,0), dim=c(5,5)) 
+  pattern2 = array(c(0,0,0,0,0, 0,0,0,0,0, 0,1,1,1,0, 0,0,0,0,0, 0,0,0,0,0), dim=c(5,5))
+  patterns = abind(pattern1, pattern2, along=3)
+  
+  creature <- list(color = '#00ff00', patterns=patterns)
+  # ----------------------------------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------------------------------
+             
+  return(creature)
 }
 
-getPatterns <- function(paths) {
-  # TODO: Leila
-  # TODO: für alle paths creatures auslesen und als vector von objekten zurückgeben
+getAllPatterns <- function(paths) {
+  # für alle paths creatures auslesen und als vector von objekten zurückgeben
+  creatures <- list()
   for (i in 1:length(paths)) {
-    # load.masks(paths(i))
+    creatures[[length(creatures) +1]] <- load.masks(paths[i])
   }
+  return(creatures);
 }
 
-detectPatterns <- function(M, creatures) {
-  # TODO Ana
+detectPatterns <- function(M, creatures, colorMapping) {
   for (i in 1:length(creatures)) {
-   # for (j in 1:length(creatures[i].patterns)) {
-      #M = findPatternMatch(M, creatures[i].patterns[j], creatures[i].color);  
+    for (j in 1:dim(creatures[[i]]$patterns)[3]) {
+      col = colorMapping$num[which(colorMapping$col == creatures[[i]]$color)];
+      M = findPatternMatch(M, creatures[[i]]$patterns[,,j], col);  
     }
-   # }
+  }
   return(M)
 }
 
-starteSpiel <- function(iter_number, matrix_size, save_path) {
+starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping) {
   M <- createMatrix(matrix_size)
+  
   for (i in c(1:iter_number)) { # check if for-Loop correct
-    # prüfe wer überlebt hat und update
-    M <- computeAll(M)
-    
     # TODO:
     # finde und färbe patterns
-    M = detectPatterns(M, getPatterns())
+    paths = c('xxx')
+    M = detectPatterns(M, getAllPatterns(paths), colorMapping)
     
     # zeige M
-    visualise(M);
+    visualise(M, colorMapping);
     Sys.sleep(1);
     
     # speichere M if nötig
@@ -233,16 +225,17 @@ starteSpiel <- function(iter_number, matrix_size, save_path) {
     # setzte M zurück (= entfärben)
     M = decolorM(M);
     
+    # prüfe wer überlebt hat und update
+    M <- computeAll(M)
   }
 }
-#------Test-----
-M=createMatrix(10)
-visualise(M)
- #computeIsAlive(N)
-M.updated <-computeAll(M)
-visualise(M.updated)
-#------Test-----
+
 # Spiel starten: 
 # starteSpiel(1000, 300, '..blabla');
 save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
-starteSpiel(10, 100, save_path)
+save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
+
+colorMapping = data.frame(num=c(0,1,5,10), col=c('white', 'black', 'red', '#00ff00'), stringsAsFactors = FALSE)
+
+
+starteSpiel(10, 100, save_path, colorMapping)
