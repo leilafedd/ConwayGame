@@ -160,6 +160,26 @@ load.masks <- function(path) {
     # bsp:
     # #45fe00
     # 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
+  creature <- {}
+  con <- file(path, "r")
+  line.number <- 1
+  while(TRUE){
+    line <- readLines(con, n=1)
+    if(length(line) == 0){
+      break
+    }
+    if(line.number %% 2 == 0 ){
+      creature$patterns = line
+    }else{
+      creature$color = line
+    }
+    line.number <- line.number + 1
+    print(line)
+  }
+  close(con)
+  
+  # mydata = read.table(path) 
+  # mydata
   
   # RETURN: creature
   # creature.patterns = eine Matrix der Größe MxMxN, M - Patterngröße, N - Anzahl Patterns
@@ -185,14 +205,17 @@ load.masks <- function(path) {
   return(creature)
 }
 
-getAllPatterns <- function(paths) {
-  # für alle paths creatures auslesen und als vector von objekten zurückgeben
-  creatures <- list()
-  for (i in 1:length(paths)) {
-    creatures[[length(creatures) +1]] <- load.masks(paths[i])
-  }
-  return(creatures);
-}
+path <- 'color and pattern/block.txt'
+load.masks(path)
+
+# getAllPatterns <- function(paths) {
+#   # für alle paths creatures auslesen und als vector von objekten zurückgeben
+#   creatures <- list()
+#   for (i in 1:length(paths)) {
+#     creatures[[length(creatures) +1]] <- load.masks(paths[i])
+#   }
+#   return(creatures);
+# }
 
 detectPatterns <- function(M, creatures, colorMapping) {
   for (i in 1:length(creatures)) {
