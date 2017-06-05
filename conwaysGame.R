@@ -164,7 +164,7 @@ load.masks <- function(path) {
   creature <- {}
   r <- as.integer(scan(file=path, skip =1, nlines = 1, what = "numerical"))
   patterns <- array(dim = c(r,r,1))
-  dat = read.table(file = path, skip = 3, header = FALSE, comment.char = "")
+  dat = read.table(file = path, skip = 2, header = FALSE, comment.char = "")
   con <- file(path, "r")
   line.number <- 1
   while(TRUE){
@@ -187,17 +187,16 @@ load.masks <- function(path) {
   creature$patterns <- patterns
   return(creature)
 }
-path <- 'color and pattern/blinker.txt'
-creature1 <- load.masks(path)
 
-# getAllPatterns <- function(paths) {
-#   # für alle paths creatures auslesen und als vector von objekten zurückgeben
-#   creatures <- list()
-#   for (i in 1:length(paths)) {
-#     creatures[[length(creatures) +1]] <- load.masks(paths[i])
-#   }
-#   return(creatures);
-# }
+
+getAllPatterns <- function(paths) {
+  # für alle paths creatures auslesen und als vector von objekten zurückgeben
+  # creatures <- list()
+  for (i in 1:length(paths)) {
+    creatures[[length(creatures) +1]] <- load.masks(paths[i])
+  }
+  return(creatures);
+}
 
 detectPatterns <- function(M, creatures, colorMapping) {
   for (i in 1:length(creatures)) {
@@ -239,6 +238,16 @@ starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping) {
 # starteSpiel(1000, 300, '..blabla');
 save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
 save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
+
+path.blinker <- 'color and pattern/blinker.txt'
+path.block <- 'color and pattern/block.txt'
+path.glider <- 'color and pattern/glider.txt'
+path.tub <- 'color and pattern/tub.txt'
+paths = array(data=c(path.blinker, path.block, path.glider, path.tub))
+
+#--------TEST-------
+creatures <- list()
+creatures = getAllPatterns(paths)
 
 colorMapping = data.frame(num=c(0,1,5,10), col=c('white', 'black', 'red', '#00ff00'), stringsAsFactors = FALSE)
 
