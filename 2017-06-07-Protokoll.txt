@@ -1,0 +1,20 @@
+TODO: 
+ 0) Quellcode mit Fragen per Email versenden (TODO: Ana)
+ 1) Musterrotation (Implementierung): (jeder bringt eine Implementierungsidee -> dann fassen gemeinsam zusammen)
+ 		falls ein Muster vorgegeben, sollte dieses in mehreren Rotationen erkannt sein
+ 		(z.B. die Glider-Patterns um 90/180 Grad rotieren, um die Glider, die sich in die andere Richtung bewegen zu erkennen)
+ 2) Quellcode dokumentieren (jeder dokumentiert seine eigene Funktionen)
+ 3) Problem mit dimension von creature$pattens: 
+ 		Versuchen die Patterns als Liste von 2D Matrizen statt als 3D Array anzulegen (Selina ?)
+ 		oder abind für patterns_num = 1 ebenfalls aufrufen
+ 		Funktion "str" benutzen ?
+ 4) Auch nicht Quadratische Pattens erkennen (TODO: Selina)
+ 5) colorMapping aus creatures automatisch generieren (TODO: Ana?)
+
+
+Fragen: 
+  Nachbarschaft -> effizienter berechnen?
+  Zugriff per Referenz:
+    - globale Variablen anlegen?
+    - innere Funktionen schreiben
+  Verschachtelte for-Schleifen effizienter gestalten?
