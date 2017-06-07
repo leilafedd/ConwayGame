@@ -155,39 +155,43 @@ findPatternMatch <- function(M, pattern, colNum) {
 # TODO: findPatternMatch_2 from Leila
 
 load.masks <- function(path) {
+  library(abind)
   # TODO Selina:
-    #lese die Datei aus
-    # bsp:
-    # #45fe00
-    # 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
+  #lese die Datei aus
+  # bsp:
+  # #45fe00
+  # 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
+  creature <- {}
+  r <- as.integer(scan(file=path, skip =1, nlines = 1, what = "numerical"))
+  patterns <- array(dim = c(r,r,1))
+  dat = read.table(file = path, skip = 2, header = FALSE, comment.char = "")
+  con <- file(path, "r")
+  line.number <- 1
+  while(TRUE){
+    line <- readLines(con, n=1)
+    if(length(line) == 0){
+      break
+    }
+    if(line.number > 2){
+      pattern <- matrix(scan(text = line, what = "numeric"), nrow=r, byrow = TRUE)
+      class(pattern) <- "numeric"
+      patterns <- abind(patterns, pattern)
+    }
+    line.number <- line.number + 1
+  }
+  close(con)
   
-  # RETURN: creature
-  # creature.patterns = eine Matrix der Größe MxMxN, M - Patterngröße, N - Anzahl Patterns
-  # creature.color = #45fe00
-  
-  # ---------------------------- FOR TESTS -------------------------------------------------------------
-  # -------------------- Remove after implementing -----------------------------------------------------
-  tryCatch({
-    library(abind)  
-  }, error = function(e){
-    install.packages("abind")
-    library(abind)
-  })
-  
-  pattern1 = array(c(0,0,0,0,0, 0,0,1,0,0, 0,0,1,0,0, 0,0,1,0,0, 0,0,0,0,0), dim=c(5,5)) 
-  pattern2 = array(c(0,0,0,0,0, 0,0,0,0,0, 0,1,1,1,0, 0,0,0,0,0, 0,0,0,0,0), dim=c(5,5))
-  patterns = abind(pattern1, pattern2, along=3)
-  
-  creature <- list(color = '#00ff00', patterns=patterns)
-  # ----------------------------------------------------------------------------------------------------
-  # ----------------------------------------------------------------------------------------------------
-             
+  colour <- scan(file=path, nlines =1, comment.char = "", what="character")
+  creature$color <- colour
+  patterns <- patterns[,,-1]
+  creature$patterns <- patterns
   return(creature)
 }
 
+
 getAllPatterns <- function(paths) {
   # für alle paths creatures auslesen und als vector von objekten zurückgeben
-  creatures <- list()
+  # creatures <- list()
   for (i in 1:length(paths)) {
     creatures[[length(creatures) +1]] <- load.masks(paths[i])
   }
@@ -234,6 +238,16 @@ starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping) {
 # starteSpiel(1000, 300, '..blabla');
 save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
 save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
+
+path.blinker <- 'color and pattern/blinker.txt'
+path.block <- 'color and pattern/block.txt'
+path.glider <- 'color and pattern/glider.txt'
+path.tub <- 'color and pattern/tub.txt'
+paths = array(data=c(path.blinker, path.block, path.glider, path.tub))
+
+#--------TEST-------
+creatures <- list()
+creatures = getAllPatterns(paths)
 
 colorMapping = data.frame(num=c(0,1,5,10), col=c('white', 'black', 'red', '#00ff00'), stringsAsFactors = FALSE)
 
