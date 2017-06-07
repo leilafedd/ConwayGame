@@ -152,11 +152,41 @@ findPatternMatch <- function(M, pattern, colNum) {
   return(M)
 }
 
-# TODO: findPatternMatch_2 from Leila
+#findPatternMatch_2 from Leila
+#prüft ob zwei Matrizen gleich sind
+matequal <- function(x, y)
+  is.matrix(x) && is.matrix(y) && dim(x) == dim(y) && all(x == y)
+
+#findPatternMatch_2 from Leila
+findPatternMatch_2<-function(mask,M,col)
+{
+  maskSize<-dim(mask)
+  nrM<-nrow(M)
+  ncM<-ncol(M)
+  for(i in 1:(nrM-maskSize[1]))
+  {
+    for(j in 1:(ncM-maskSize[1]))
+    {
+      N<-M[i:(i+(maskSize[1]-1)),j:(j+(maskSize[1]-1))]
+      if(matequal(mask,N))
+      {
+        N[which(N == 1)] <- col
+        M[i:(i+(maskSize[1]-1)),j:(j+(maskSize[1]-1))]<-N
+      }
+    }
+  }
+  return(M)
+}
+
 
 load.masks <- function(path) {
-  library(abind)
-  # TODO Selina:
+  tryCatch({
+    library(abind)
+  }, error = function(e) {
+    install.packages("abind")
+    library(abind)
+  })
+  # Selina:
   #lese die Datei aus
   # bsp:
   # #45fe00
@@ -199,22 +229,28 @@ getAllPatterns <- function(paths) {
 }
 
 detectPatterns <- function(M, creatures, colorMapping) {
-  for (i in 1:length(creatures)) {
-    for (j in 1:dim(creatures[[i]]$patterns)[3]) {
+  for (i in c(1:length(creatures))) {
+    pattern_num = dim(creatures[[i]]$patterns)[3]
+    if (is.na(pattern_num)) {
+      pattern_num = 1
+    }
+    for (j in c(1:pattern_num)) {
       col = colorMapping$num[which(colorMapping$col == creatures[[i]]$color)];
-      M = findPatternMatch(M, creatures[[i]]$patterns[,,j], col);  
+      if (pattern_num > 1) {
+        M = findPatternMatch(M, creatures[[i]]$patterns[,,j], col);    
+      } else {
+        M = findPatternMatch(M, creatures[[i]]$patterns, col);    
+      }
+      
     }
   }
   return(M)
 }
 
-starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping) {
+starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping, paths) {
   M <- createMatrix(matrix_size)
   
   for (i in c(1:iter_number)) { # check if for-Loop correct
-    # TODO:
-    # finde und färbe patterns
-    paths = c('xxx')
     M = detectPatterns(M, getAllPatterns(paths), colorMapping)
     
     # zeige M
@@ -237,7 +273,7 @@ starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping) {
 # Spiel starten: 
 # starteSpiel(1000, 300, '..blabla');
 save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
-save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
+#save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
 
 path.blinker <- 'color and pattern/blinker.txt'
 path.block <- 'color and pattern/block.txt'
@@ -249,7 +285,7 @@ paths = array(data=c(path.blinker, path.block, path.glider, path.tub))
 creatures <- list()
 creatures = getAllPatterns(paths)
 
-colorMapping = data.frame(num=c(0,1,5,10), col=c('white', 'black', 'red', '#00ff00'), stringsAsFactors = FALSE)
+colorMapping = data.frame(num=c(0,1,2,3,4,5), col=c('white', 'black', '#9bea00', '#ff0000', '#9a32cd', '#00eeee'), stringsAsFactors = FALSE)
 
 
-starteSpiel(10, 100, save_path, colorMapping)
+starteSpiel(100, 100, save_path, colorMapping, paths)
