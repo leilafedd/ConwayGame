@@ -1,3 +1,8 @@
+# unsere Fragen:
+# 1) Wie können wir die Nachbarschaft-Matrix bei getNeghbours effizienter berechnen?
+# 2) Gibt es Möglichkeit die verschachtelten for-Schleifen effizienter zu gestalten (vll mit apply())?
+
+
 getNeighbours <- function(M, i,j) {
   # return 3x3 Matrix (M(i,j) in der Mitte und seine Nachbarn
   
@@ -16,7 +21,8 @@ getNeighbours <- function(M, i,j) {
     if(c == 0)c <-ncM
     d <- j+1
     if(d==ncM+1) d <- 1
-    
+  
+    # Nachbarschaft -> effizienter initialisieren ?  
     N[1,1] <- M[a,c]
     N[2,1] <- M[i,c]
     N[3,1] <- M[b,c]
@@ -192,7 +198,7 @@ load.masks <- function(path) {
   # #45fe00
   # 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
   creature <- {}
-  r <- as.integer(scan(file=path, skip =1, nlines = 1, what = "numerical"))
+  r <- as.integer(scan(file=path, skip =1, nlines = 1, what = "numerical", quiet = TRUE))
   patterns <- array(dim = c(r,r,1))
   dat = read.table(file = path, skip = 2, header = FALSE, comment.char = "")
   con <- file(path, "r")
@@ -203,7 +209,7 @@ load.masks <- function(path) {
       break
     }
     if(line.number > 2){
-      pattern <- matrix(scan(text = line, what = "numeric"), nrow=r, byrow = TRUE)
+      pattern <- matrix(scan(text = line, what = "numeric", quiet = TRUE), nrow=r, byrow = TRUE)
       class(pattern) <- "numeric"
       patterns <- abind(patterns, pattern)
     }
@@ -211,7 +217,7 @@ load.masks <- function(path) {
   }
   close(con)
   
-  colour <- scan(file=path, nlines =1, comment.char = "", what="character")
+  colour <- scan(file=path, nlines =1, comment.char = "", what="character", quiet = TRUE)
   creature$color <- colour
   patterns <- patterns[,,-1]
   creature$patterns <- patterns
@@ -249,13 +255,14 @@ detectPatterns <- function(M, creatures, colorMapping) {
 
 starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping, paths) {
   M <- createMatrix(matrix_size)
+  patterns <- getAllPatterns(paths)
   
   for (i in c(1:iter_number)) { # check if for-Loop correct
-    M = detectPatterns(M, getAllPatterns(paths), colorMapping)
+    M = detectPatterns(M, patterns, colorMapping)
     
     # zeige M
     visualise(M, colorMapping);
-    Sys.sleep(1);
+    #Sys.sleep(1);
     
     # speichere M if nötig
     if (i%%1 == 0) {
@@ -271,21 +278,16 @@ starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping, paths
 }
 
 # Spiel starten: 
-# starteSpiel(1000, 300, '..blabla');
 save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
 #save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
 
 path.blinker <- 'color and pattern/blinker.txt'
 path.block <- 'color and pattern/block.txt'
 path.glider <- 'color and pattern/glider.txt'
+path.fourglidertub <- 'color and pattern/four_glider_tub.txt'
 path.tub <- 'color and pattern/tub.txt'
-paths = array(data=c(path.blinker, path.block, path.glider, path.tub))
+paths = array(data=c(path.blinker, path.block, path.glider, path.fourglidertub, path.tub))
 
 #--------TEST-------
-creatures <- list()
-creatures = getAllPatterns(paths)
-
-colorMapping = data.frame(num=c(0,1,2,3,4,5), col=c('white', 'black', '#9bea00', '#ff0000', '#9a32cd', '#00eeee'), stringsAsFactors = FALSE)
-
-
+colorMapping = data.frame(num=c(0,1,2,3,4,5,6), col=c('white', 'black', '#9bea00', '#ff0000', '#9a32cd', '#00eeee', '#ff9900'), stringsAsFactors = FALSE)
 starteSpiel(100, 100, save_path, colorMapping, paths)
