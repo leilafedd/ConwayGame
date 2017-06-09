@@ -198,9 +198,10 @@ load.masks <- function(path) {
   # #45fe00
   # 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
   creature <- {}
-  r <- as.integer(scan(file=path, skip =1, nlines = 1, what = "numerical", quiet = TRUE))
-  patterns <- array(dim = c(r,r,1))
-  dat = read.table(file = path, skip = 2, header = FALSE, comment.char = "")
+  c <- as.integer(scan(file=path, skip =1, nlines = 1, what = "numerical", quiet = TRUE))
+  r <- as.integer(scan(file=path, skip =2, nlines = 1, what = "numerical", quiet = TRUE))
+  patterns <- {}
+  dat = read.table(file = path, skip = 3, header = FALSE, comment.char = "")
   con <- file(path, "r")
   line.number <- 1
   while(TRUE){
@@ -208,18 +209,17 @@ load.masks <- function(path) {
     if(length(line) == 0){
       break
     }
-    if(line.number > 2){
-      pattern <- matrix(scan(text = line, what = "numeric", quiet = TRUE), nrow=r, byrow = TRUE)
+    if(line.number > 3){
+      pattern <- matrix(scan(text = line, what = "numeric", quiet = TRUE), nrow=r, ncol = c, byrow = TRUE)
       class(pattern) <- "numeric"
-      patterns <- abind(patterns, pattern)
+      patterns <- append(patterns, list(pattern))
     }
     line.number <- line.number + 1
   }
   close(con)
-  
+  #print(line.number)
   colour <- scan(file=path, nlines =1, comment.char = "", what="character", quiet = TRUE)
   creature$color <- colour
-  patterns <- patterns[,,-1]
   creature$patterns <- patterns
   return(creature)
 }
@@ -286,6 +286,7 @@ path.block <- 'color and pattern/block.txt'
 path.glider <- 'color and pattern/glider.txt'
 path.fourglidertub <- 'color and pattern/four_glider_tub.txt'
 path.tub <- 'color and pattern/tub.txt'
+path.test <- 'color and pattern/test.txt'
 paths = array(data=c(path.blinker, path.block, path.glider, path.fourglidertub, path.tub))
 
 #--------TEST-------
