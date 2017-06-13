@@ -198,9 +198,9 @@ load.masks <- function(path) {
   # #45fe00
   # 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
   creature <- {}
+  patterns <- {}
   c <- as.integer(scan(file=path, skip =1, nlines = 1, what = "numerical", quiet = TRUE))
   r <- as.integer(scan(file=path, skip =2, nlines = 1, what = "numerical", quiet = TRUE))
-  patterns <- {}
   dat = read.table(file = path, skip = 3, header = FALSE, comment.char = "")
   con <- file(path, "r")
   line.number <- 1
@@ -227,7 +227,7 @@ load.masks <- function(path) {
 
 getAllPatterns <- function(paths) {
   # für alle paths creatures auslesen und als vector von objekten zurückgeben
-  # creatures <- list()
+  creatures <- list()
   for (i in 1:length(paths)) {
     creatures[[length(creatures) +1]] <- load.masks(paths[i])
   }
@@ -235,21 +235,33 @@ getAllPatterns <- function(paths) {
 }
 
 detectPatterns <- function(M, creatures, colorMapping) {
-  for (i in c(1:length(creatures))) {
-    pattern_num = dim(creatures[[i]]$patterns)[3]
-    if (is.na(pattern_num)) {
-      pattern_num = 1
+  # for (i in c(1:length(creatures))) {
+  # pattern_num = dim(creatures[[i]]$patterns)[3]
+  # if (is.na(pattern_num)) {
+  #   pattern_num = 1
+  # }
+  # for (j in c(1:pattern_num)) {
+  #   col = colorMapping$num[which(colorMapping$col == creatures[[i]]$color)];
+  #   if (pattern_num > 1) {
+  #     M = findPatternMatch(M, creatures[[i]]$patterns[,,j], col);
+  #   } else {
+  #     M = findPatternMatch(M, creatures[[i]]$patterns, col);
+  #   }
+  #   }
+  # }
+
+  for(i in creatures){
+    for(c in i$color){
+      col <- c
     }
-    for (j in c(1:pattern_num)) {
-      col = colorMapping$num[which(colorMapping$col == creatures[[i]]$color)];
-      if (pattern_num > 1) {
-        M = findPatternMatch(M, creatures[[i]]$patterns[,,j], col);    
-      } else {
-        M = findPatternMatch(M, creatures[[i]]$patterns, col);    
-      }
-      
+    for(p in i$patterns){
+      pat <- p
+      M = findPatternMatch(M, pat, col);
+      # print(col)
+      # print(pat)
     }
   }
+  
   return(M)
 }
 
@@ -278,16 +290,18 @@ starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping, paths
 }
 
 # Spiel starten: 
+#save_path = '/home/selina/Documents/github/tmp' 
 save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
 #save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
 
 path.blinker <- 'color and pattern/blinker.txt'
 path.block <- 'color and pattern/block.txt'
 path.glider <- 'color and pattern/glider.txt'
-path.fourglidertub <- 'color and pattern/four_glider_tub.txt'
+#path.fourglidertub <- 'color and pattern/four_glider_tub.txt'
 path.tub <- 'color and pattern/tub.txt'
 path.test <- 'color and pattern/test.txt'
-paths = array(data=c(path.blinker, path.block, path.glider, path.fourglidertub, path.tub))
+paths = array(data=c(path.blinker, path.block, path.glider, path.tub)) #,path.fourglidertub))
+
 
 #--------TEST-------
 colorMapping = data.frame(num=c(0,1,2,3,4,5,6), col=c('white', 'black', '#9bea00', '#ff0000', '#9a32cd', '#00eeee', '#ff9900'), stringsAsFactors = FALSE)
