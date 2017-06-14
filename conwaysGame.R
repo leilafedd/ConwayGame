@@ -111,7 +111,7 @@ computeAll <- function(M) {
 }
 
 
-visualise <- function(M, colorMapping) {
+visualise <- function(M, colorMapping, plotname) {
   tryCatch({
     library(plotrix)
   }, error = function(e) {
@@ -123,7 +123,7 @@ visualise <- function(M, colorMapping) {
   for (i in 1:dim(colorMapping)[1]) {
     cellcol[which(M == colorMapping$num[i])] <- colorMapping$col[i]
   }
-  color2D.matplot(M, cellcolors = cellcol, border=NA)
+  color2D.matplot(M, cellcolors = cellcol, border=NA, main=plotname)
 }
 
 save <- function(M, save_path, iter_id) {
@@ -145,6 +145,7 @@ decolorM <- function(M) {
 
 # findPatternMatch from Ana
 findPatternMatch <- function(M, pattern, colNum) {
+  # TODO Vorschlag: finde auch Muster, die am Rand platziert sind, d.h sich an Torus-Klebelinie befinden
   location = matrix(, ncol=2)
   for (i in 1:(nrow(M)-nrow(pattern)-1)) {
     for (j in 1:(ncol(M)-ncol(pattern)-1)) {
@@ -251,9 +252,11 @@ detectPatterns <- function(M, creatures, colorMapping) {
   # }
 
   for(i in creatures){
-    for(c in i$color){
-      col <- c
-    }
+    # for(c in i$color){
+    #   col <- c
+    # }
+    col = colorMapping$num[which(colorMapping$col == i$color)];
+    
     for(p in i$patterns){
       pat <- p
       M = findPatternMatch(M, pat, col);
@@ -265,15 +268,70 @@ detectPatterns <- function(M, creatures, colorMapping) {
   return(M)
 }
 
-starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping, paths) {
-  M <- createMatrix(matrix_size)
+createColorMapping <- function(creatures) {
+  numbers <- c(0,1)
+  colors <- c('white', 'black')
+  
+  for (i in creatures) {
+    if (sum(colors == i$color) == 0) {
+      numbers <- union(numbers, numbers[length(numbers)]+1)
+      colors <- union(colors, i$color)    
+    }
+  }
+  colorMapping = data.frame(num=numbers, col=colors, stringsAsFactors = FALSE)
+  return(colorMapping)
+}
+
+rotatePattern90degRight <- function(pattern) {
+  rotatedPattern <- t(pattern[nrow(pattern):1,])
+  return(rotatedPattern)
+}
+
+getRotationNumber <- function(pattern) {
+  if (identical(pattern[nrow(pattern):1,], t(pattern[nrow(pattern):1,]))) {
+    if (identical(pattern[nrow(pattern):1,], pattern)) {
+      return(0)
+    } else {
+      return(1)
+    }
+  } else {
+    return(3)
+  }
+}
+
+addRotatedPatterns <- function(creature) {
+  patterns <- creature$patterns
+  for (p in creature$patterns) {
+    pat <- p
+    n <- getRotationNumber(pat)
+    if (n > 0) {
+      for( i in 1:n) {
+        pat <- rotatePattern90degRight(pat)
+        # TODO: prüfe ob das gleiche Muster bereits in der Pattern-Liste drin ist
+        patterns <- append(patterns, list(pat))
+      }  
+    }
+    
+  }
+  creature$patterns <- patterns
+  return(creature)
+}
+
+starteSpiel <- function(iter_number, matrix_or_size, save_path, paths) {
+  if (is.matrix(matrix_or_size)) {
+    M <- matrix_or_size
+  } else {
+    M <- createMatrix(matrix_or_size)  
+  }
+  
   patterns <- getAllPatterns(paths)
+  colorMapping <- createColorMapping(patterns)
   
   for (i in c(1:iter_number)) { # check if for-Loop correct
     M = detectPatterns(M, patterns, colorMapping)
     
     # zeige M
-    visualise(M, colorMapping);
+    visualise(M, colorMapping, sprintf('Iteration %d', i));
     #Sys.sleep(1);
     
     # speichere M if nötig
@@ -291,8 +349,9 @@ starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping, paths
 
 # Spiel starten: 
 #save_path = '/home/selina/Documents/github/tmp' 
-save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
-#save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
+#save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
+# set
+save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
 
 path.blinker <- 'color and pattern/blinker.txt'
 path.block <- 'color and pattern/block.txt'
@@ -304,5 +363,4 @@ paths = array(data=c(path.blinker, path.block, path.glider, path.tub)) #,path.fo
 
 
 #--------TEST-------
-colorMapping = data.frame(num=c(0,1,2,3,4,5,6), col=c('white', 'black', '#9bea00', '#ff0000', '#9a32cd', '#00eeee', '#ff9900'), stringsAsFactors = FALSE)
-starteSpiel(100, 100, save_path, colorMapping, paths)
+starteSpiel(100, 100, save_path, paths)
