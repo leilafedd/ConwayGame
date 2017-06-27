@@ -1,16 +1,17 @@
 #' Creates a 3x3 neighbour matrix for a given element
 #'
-#' @author Selina Müller
-#'
 #' @param env Environment containing game matrix: M and dataframe: colorMapping
 #' @param i row index of matrix element
 #' @param j column index of matrix element
 #'
 #' @return 3x3 matrix of neighbours for an element with given indices
-#' 
+
 getNeighbours <- function(env, i,j) {
+  # return 3x3 Matrix (M(i,j) in der Mitte und seine Nachbarn
   
   ncM <- ncol(env$M)
+  #nrow == ncol, da es eine quadratische Matrix ist
+  #nrM <- nrow(M)
   N <- matrix(nrow = 3, ncol = 3);
   
   if(i == 1 || i == ncM || j == 1 || j == ncM ){
@@ -24,6 +25,7 @@ getNeighbours <- function(env, i,j) {
     d <- j+1
     if(d==ncM+1) d <- 1
     
+    # Nachbarschaft -> effizienter initialisieren ?  
     N[1,1] <- env$M[a,c]
     N[2,1] <- env$M[i,c]
     N[3,1] <- env$M[b,c]
@@ -33,6 +35,7 @@ getNeighbours <- function(env, i,j) {
     N[1,3] <- env$M[a,d]
     N[2,3] <- env$M[i,d]
     N[3,3] <- env$M[b,d]
+    
     
   }else{
     
@@ -46,14 +49,23 @@ getNeighbours <- function(env, i,j) {
   return(N)
 }
 
+computeIsAlive2 <- function(N) {
+  allElem <- sum(N)
+  if (N[2,2] == 1) {
+    if (allElem < 5 && allElem > 2) {
+      return(1)
+    } else {
+      return(0)
+    }
+  } else {
+    if (allElem == 3) {
+      return(1)
+    } else {
+      return(0)
+    }
+  }
+}
 
-#' Decides if a given matrix cell remains alive/dead or not
-#'
-#'@author Leila Feddoul
-#' @param N 3x3 neighbours matrix for one cell 
-#'
-#' @return binary cell value; 1 if alive; 0 if not
-#' 
 computeIsAlive <- function(N) {
   # return 0(Tot) oder 1(Lebend)
   alive<-0
@@ -82,47 +94,20 @@ computeIsAlive <- function(N) {
   return(0)
 }
 
-
-#' Alternative implementation of computeIsAlive function.
-#' Decides if a given matrix cell remains alive/dead or not.
-#'
-#' @author Anastasia Aftakhova
-#' 
-#' @param N 3x3 neighbours matrix for one cell 
-#'
-#' @return binary cell value; 1 if alive; 0 if not
-#' 
-computeIsAlive2 <- function(N) {
-  allElem <- sum(N)
-  if (N[2,2] == 1) {
-    if (allElem < 5 && allElem > 2) {
-      return(1)
-    } else {
-      return(0)
-    }
-  } else {
-    if (allElem == 3) {
-      return(1)
-    } else {
-      return(0)
-    }
-  }
-}
-
-
 #' Determines for each cell in Matrix M, if it survives or dies 
 #' and saves updated matrix in R
-#' 
-#' @author Selina Müller
 #'
 #' @param env Environment containing game matrix: M and dataframe: colorMapping
 #'
 computeAll <- function(env) {
   R <- matrix(data=0, ncol=ncol(env$M), nrow=nrow(env$M))
   
+  #a<-apply(N, MARGIN=c(1,2), function(x) x + 2)
   ncM <- ncol(env$M)
   nrM <- nrow(env$M)
   
+  # Wie könnte man an diese Stelle sich "apply()" nützlich machen? 
+  # Brauchen etwas wie R <- apply(M, @computeIsAlive(getNeghbours(M)))
   for (i in 1:nrM){
     for(j in 1:ncM){
       N<-getNeighbours(env,i,j)
@@ -133,13 +118,6 @@ computeAll <- function(env) {
 }
 
 
-#' Visualises the cell matrix in a plot.
-#' 
-#' @author Anastasia Aftakhova
-#'
-#' @param env Environment containing the cell matrix and the color mapping
-#' @param plotname name of the plotted image
-#' 
 visualise <- function(env, plotname) {
   tryCatch({
     library(plotrix)
@@ -155,54 +133,25 @@ visualise <- function(env, plotname) {
   color2D.matplot(env$M, cellcolors = cellcol, border=NA, main=plotname)
 }
 
-
-#' Saves the current cell matrix plot image into the input path directory
-#'
-#' @author Anastasia Aftakhova
-#' 
-#' @param save_path full path string of a directory to save the image into
-#' @param iter_id number of current game iteration
-#' 
 save <- function(save_path, iter_id) {
   dev.copy(png, sprintf('%s/cgofl_%s.png', save_path, iter_id), width=500, height=500, units="px")
   dev.off()
 }
 
-
-#' Creates a square cell matrix with randomly filled cell values of a given size
-#' 
-#' @author Leila Feddoul
-#' 
-#' @param matrix_size number of rows(= number of columns) of matrix
-#'
-#' @return square binary matrix of size matrix_size x matrix_size
-#' 
 createMatrix <- function(matrix_size) {
+  # return M (matrix_size x matrix_size)visualise(M)
   matrix = replicate(matrix_size,sample(c(0,1),matrix_size,replace = TRUE ,c(0.5,0.5)))
   return(matrix)
 }
 
-
-#' Decolors the matrix. Replaces color numbers in the cell matrix with the default alive value.
-#'
-#' @author Anastasia Aftakhova
-#'
-#' @param col Environment containing the cell matrix
-#' 
 decolorM <- function(env) {
   env$M[which(env$M >0)] = 1;
 }
 
 
-#' Searches for given pattern in the cell matrix and colors it if found.
-#' 
-#' @author Anastasia Aftakhova
-#' 
-#' @param env Environment containing the cell matrix an color mapping
-#' @param pattern 2D matrix of a pattern to be recognized 
-#' @param colNum a color number which is set for alive cells of a found pattern
-#' 
+# findPatternMatch from Ana
 findPatternMatch <- function(env, pattern, colNum) {
+  # TODO Vorschlag: finde auch Muster, die am Rand platziert sind, d.h sich an Torus-Klebelinie befinden
   location = matrix(, ncol=2)
   for (i in 1:(nrow(env$M)-nrow(pattern)-1)) {
     for (j in 1:(ncol(env$M)-ncol(pattern)-1)) {
@@ -215,59 +164,39 @@ findPatternMatch <- function(env, pattern, colNum) {
   }
 }
 
-
-#' Checks if two matrices are equal
-#' 
-#' @author Leila Feddoul
-#' 
-#' @param x first matrix
-#' @param y second matrix
-#' 
-#' @return TRUE if x and y are both matrices, have same dimension and same elements, FALSE otherwise
-#' 
+#findPatternMatch_2 from Leila
+#prüft ob zwei Matrizen gleich sind
 matequal <- function(x, y)
   is.matrix(x) && is.matrix(y) && dim(x) == dim(y) && all(x == y)
 
-
-#' Alternative implementation for findPatternMatch function.
-#' Searches for given pattern in the cell matrix and colors it if found
-#' 
-#' @author Leila Feddoul
-#' 
-#' @param env Environment containing the cell matrix an color mapping
-#' @param mask 2D matrix of a pattern to be recognized 
-#' @param col a color number which is set for alive cells of a found pattern
-#' 
-findPatternMatch_2<-function(env, mask, col)
+#findPatternMatch_2 from Leila
+findPatternMatch_2<-function(mask,M,col)
 {
   maskSize<-dim(mask)
-  nrM<-nrow(env$M)
-  ncM<-ncol(env$M)
+  nrM<-nrow(M)
+  ncM<-ncol(M)
   for(i in 1:(nrM-maskSize[1]))
   {
     for(j in 1:(ncM-maskSize[1]))
     {
-      N<-env$M[i:(i+(maskSize[1]-1)),j:(j+(maskSize[1]-1))]
+      N<-M[i:(i+(maskSize[1]-1)),j:(j+(maskSize[1]-1))]
       if(matequal(mask,N))
       {
         N[which(N == 1)] <- col
-        env$M[i:(i+(maskSize[1]-1)),j:(j+(maskSize[1]-1))]<-N
+        M[i:(i+(maskSize[1]-1)),j:(j+(maskSize[1]-1))]<-N
       }
     }
   }
+  return(M)
 }
-
 
 #' Reads a .txt-file containing matrix patterns that ought to be recognized
 #' and saves all patterns in a list of matrices. The object "creature" 
 #' is created wich contains said list and its assigned colour. 
-#' 
-#' @author Selina Müller
 #'
 #' @param path file path containing the pattern as a .txt-file
 #'
 #' @return an object containing all patterns and assigned colour of given file path
-#' 
 load.masks <- function(path) {
   creature <- {}
   patterns <- {}
@@ -297,12 +226,9 @@ load.masks <- function(path) {
 
 #' Iterates through list of file paths containing all patterns and saving them in an object called creatures.
 #'
-#' @author Selina Müller
-#'
 #' @param paths list of file paths, each containing patterns as a .txt-file
 #'
 #' @return a vector containing objects holding all patterns and assigned colour of each file in paths
-#' 
 getAllPatterns <- function(paths) {
   # für alle paths creatures auslesen und als vector von objekten zurückgeben
   creatures <- list()
@@ -312,13 +238,6 @@ getAllPatterns <- function(paths) {
   return(creatures);
 }
 
-#' Recognizes known patterns for a specific iteration of a game.
-#' 
-#' @author Anastasia Aftakhova
-#' 
-#' @param env Environment with specified game matrix and
-#' creature object list (= patterns or figures to recognize)
-#'
 detectPatterns <- function(env) {
   for(i in env$creatures){
     col = env$colorMapping$num[which(env$colorMapping$col == i$color)];
@@ -328,14 +247,6 @@ detectPatterns <- function(env) {
   }
 }
 
-
-#' Automatically creates a color mapping for the environment 
-#' with the given creature list
-#'
-#' @author Anastasia Aftakhova
-#'
-#' @param env Environment with creature object list
-#' 
 createColorMapping <- function(env) {
   numbers <- c(0,1)
   colors <- c('white', 'black')
@@ -349,31 +260,11 @@ createColorMapping <- function(env) {
   env$colorMapping = data.frame(num=numbers, col=colors, stringsAsFactors = FALSE)
 }
 
-
-#' Rotates the given matrix 90 degrees on the right
-#'
-#' @author Anastasia Aftakhova
-#'
-#' @param pattern input 2D matrix
-#'
-#' @return a rotated input matrix
-#' 
 rotatePattern90degRight <- function(pattern) {
   rotatedPattern <- t(pattern[nrow(pattern):1,])
   return(rotatedPattern)
 }
 
-
-#' Adjusts creature patterns list with the rotated patterns 
-#' in order to detect all rotations of patterns
-#'
-#' @author Anastasia Aftakhova
-#'
-#' @param creature a list object containing color and a list 
-#' of 2D matrices with patterns for this "creature"
-#'
-#' @return modified creature object
-#' 
 addRotatedPatterns <- function(creature) {
   patterns <- creature$patterns
   for (p in creature$patterns) {
@@ -398,8 +289,6 @@ addRotatedPatterns <- function(creature) {
 
 #' Main game loop. Manages creation os start matrix and its updating, as well as pattern detection 
 #' and visualization of matrix with each iteration
-#' 
-#' @author Anastasia Aftakhova, Leila Feddoul, Selina Müller
 #'
 #' @param iter_number number of iterations of the game (life cycles) 
 #' @param matrix_or_size containing either a start matrix for the game of life or the size the start matrix should have
@@ -420,10 +309,12 @@ starteSpiel <- function(iter_number, matrix_or_size, save_path, paths) {
   
   for (i in c(1:iter_number)) { # check if for-Loop correct
     M = detectPatterns(gameenv)
+    
+    # zeige M
     visualise(gameenv, sprintf('Iteration %d', i));
     #Sys.sleep(1);
     
-    # save M if needed
+    # speichere M if nötig
     if (i%%1 == 0) {
       save(save_path, i)
     }
@@ -431,14 +322,12 @@ starteSpiel <- function(iter_number, matrix_or_size, save_path, paths) {
     # setzte M zurück (= entfärben)
     decolorM(gameenv);
     
-    # compute next live iteration
+    # prüfe wer überlebt hat und update
     computeAll(gameenv)
   }
 }
 
-
-#-------- SET UP -------
-
+# Spiel starten: 
 # save_path = '/home/selina/Documents/github/tmp' 
 # save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
 # setwd('/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/ConwayGame')
@@ -446,9 +335,6 @@ starteSpiel <- function(iter_number, matrix_or_size, save_path, paths) {
 setwd('/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/uebungen')
 save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/uebungen/game_snapshots'
 
-#--------  TEST -------
-
-# initialize data paths for known patterns
 path.blinker <- 'color and pattern/blinker.txt'
 path.block <- 'color and pattern/block.txt'
 path.glider <- 'color and pattern/glider.txt'
@@ -457,5 +343,6 @@ path.tub <- 'color and pattern/tub.txt'
 path.test <- 'color and pattern/test.txt'
 paths = array(data=c(path.blinker, path.block, path.glider, path.tub)) #,path.fourglidertub))
 
-# start the game
+
+#--------TEST-------
 starteSpiel(100, 100, save_path, paths)
