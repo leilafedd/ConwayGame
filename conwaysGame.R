@@ -65,7 +65,15 @@ computeIsAlive2 <- function(N) {
     }
   }
 }
-
+#' Implements the Game of live Rules.
+#' 
+#' @param N  3x3 matrix of neighbours for an element with given indices.
+#'
+#' @return 1 if the central cell of the matrix should leben or 0 when it should die .
+#'
+#' @examples
+#' N = matrix( c(0, 0, 0, 0, 1, 0, 0, 0, 0), nrow=3, ncol=3) 
+#' computeIsAlive(N)
 computeIsAlive <- function(N) {
   # return 0(Tot) oder 1(Lebend)
   alive<-0
@@ -137,6 +145,14 @@ save <- function(save_path, iter_id) {
   dev.copy(png, sprintf('%s/cgofl_%s.png', save_path, iter_id), width=500, height=500, units="px")
   dev.off()
 }
+#' creates a random nxn matrix of ones and zeros.
+#' 
+#' @param matrix_size  the size of the matrix.
+#'
+#' @return the generated matrix .
+#'
+#' @examples
+#' createMatrix(3)
 
 createMatrix <- function(matrix_size) {
   # return M (matrix_size x matrix_size)visualise(M)
@@ -165,6 +181,17 @@ findPatternMatch <- function(env, pattern, colNum) {
 }
 
 #findPatternMatch_2 from Leila
+
+#' checks if two matrices are equal : are both of them matrices and have the same dimension
+#' 
+#' @param x the first Matrix.
+#'
+#' @param y the second Matrix.
+#'
+#' @return true if the two matrices are equal otherwise false  .
+#'
+#' @examples
+#' matequal(A,B)
 #prüft ob zwei Matrizen gleich sind
 matequal <- function(x, y)
   is.matrix(x) && is.matrix(y) && dim(x) == dim(y) && all(x == y)
