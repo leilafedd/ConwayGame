@@ -1,12 +1,15 @@
-# unsere Fragen:
-# 1) Wie können wir die Nachbarschaft-Matrix bei getNeghbours effizienter berechnen?
-# 2) Gibt es Möglichkeit die verschachtelten for-Schleifen effizienter zu gestalten (vll mit apply())?
+#' Creates a 3x3 neighbour matrix for a given element
+#'
+#' @param env Environment containing game matrix: M and dataframe: colorMapping
+#' @param i row index of matrix element
+#' @param j column index of matrix element
+#'
+#' @return 3x3 matrix of neighbours for an element with given indices
 
-
-getNeighbours <- function(M, i,j) {
+getNeighbours <- function(env, i,j) {
   # return 3x3 Matrix (M(i,j) in der Mitte und seine Nachbarn
   
-  ncM <- ncol(M)
+  ncM <- ncol(env$M)
   #nrow == ncol, da es eine quadratische Matrix ist
   #nrM <- nrow(M)
   N <- matrix(nrow = 3, ncol = 3);
@@ -21,17 +24,17 @@ getNeighbours <- function(M, i,j) {
     if(c == 0)c <-ncM
     d <- j+1
     if(d==ncM+1) d <- 1
-  
+    
     # Nachbarschaft -> effizienter initialisieren ?  
-    N[1,1] <- M[a,c]
-    N[2,1] <- M[i,c]
-    N[3,1] <- M[b,c]
-    N[1,2] <- M[a,j]
-    N[2,2] <- M[i,j]
-    N[3,2] <- M[b,j]
-    N[1,3] <- M[a,d]
-    N[2,3] <- M[i,d]
-    N[3,3] <- M[b,d]
+    N[1,1] <- env$M[a,c]
+    N[2,1] <- env$M[i,c]
+    N[3,1] <- env$M[b,c]
+    N[1,2] <- env$M[a,j]
+    N[2,2] <- env$M[i,j]
+    N[3,2] <- env$M[b,j]
+    N[1,3] <- env$M[a,d]
+    N[2,3] <- env$M[i,d]
+    N[3,3] <- env$M[b,d]
     
     
   }else{
@@ -40,7 +43,7 @@ getNeighbours <- function(M, i,j) {
     f<-i+1
     g<-j-1
     h<-j+1
-    N<-M[e:f,g:h]
+    N<-env$M[e:f,g:h]
   }
   
   return(N)
@@ -65,13 +68,13 @@ computeIsAlive2 <- function(N) {
 
 computeIsAlive <- function(N) {
   # return 0(Tot) oder 1(Lebend)
-    alive<-0
+  alive<-0
   for ( i in 1:3 )
   {
     for(j in 1:3)
     {
       if(N[i,j]== 1) alive<-alive+1
-        
+      
     }
   }
   
@@ -81,52 +84,52 @@ computeIsAlive <- function(N) {
     if(alive<2 || alive>3) {return(0)}
     else
     {
-    if(alive==2 || alive==3) return(1)
+      if(alive==2 || alive==3) return(1)
     }
   }
   if(N[2,2]==0)
   {
     if(alive==3) return(1)
   }
-    return(0)
+  return(0)
 }
 
 
-computeAll <- function(M) {
-  R <- matrix(data=0, ncol=ncol(M), nrow=nrow(M))
+computeAll <- function(env) {
+  R <- matrix(data=0, ncol=ncol(env$M), nrow=nrow(env$M))
   
   #a<-apply(N, MARGIN=c(1,2), function(x) x + 2)
-  ncM <- ncol(M)
-  nrM <- nrow(M)
+  ncM <- ncol(env$M)
+  nrM <- nrow(env$M)
   
   # Wie könnte man an diese Stelle sich "apply()" nützlich machen? 
   # Brauchen etwas wie R <- apply(M, @computeIsAlive(getNeghbours(M)))
   for (i in 1:nrM){
     for(j in 1:ncM){
-      N<-getNeighbours(M,i,j)
-      R[i,j] <- computeIsAlive(N)
+      N<-getNeighbours(env,i,j)
+      R[i,j] <- computeIsAlive2(N)
     }
   }
-  return(R)
+  env$M <- R
 }
 
 
-visualise <- function(M, colorMapping) {
+visualise <- function(env, plotname) {
   tryCatch({
     library(plotrix)
   }, error = function(e) {
     install.packages("plotrix")
     library(plotrix)
   })
-
-  cellcol <- array(, dim=dim(M))
-  for (i in 1:dim(colorMapping)[1]) {
-    cellcol[which(M == colorMapping$num[i])] <- colorMapping$col[i]
+  
+  cellcol <- array(, dim=dim(env$M))
+  for (i in 1:dim(env$colorMapping)[1]) {
+    cellcol[which(env$M == env$colorMapping$num[i])] <- env$colorMapping$col[i]
   }
-  color2D.matplot(M, cellcolors = cellcol, border=NA)
+  color2D.matplot(env$M, cellcolors = cellcol, border=NA, main=plotname)
 }
 
-save <- function(M, save_path, iter_id) {
+save <- function(save_path, iter_id) {
   dev.copy(png, sprintf('%s/cgofl_%s.png', save_path, iter_id), width=500, height=500, units="px")
   dev.off()
 }
@@ -137,25 +140,24 @@ createMatrix <- function(matrix_size) {
   return(matrix)
 }
 
-decolorM <- function(M) {
-  M[which(M >0)] = 1;
-  return(M);
+decolorM <- function(env) {
+  env$M[which(env$M >0)] = 1;
 }
 
 
 # findPatternMatch from Ana
-findPatternMatch <- function(M, pattern, colNum) {
+findPatternMatch <- function(env, pattern, colNum) {
+  # TODO Vorschlag: finde auch Muster, die am Rand platziert sind, d.h sich an Torus-Klebelinie befinden
   location = matrix(, ncol=2)
-  for (i in 1:(nrow(M)-nrow(pattern)-1)) {
-    for (j in 1:(ncol(M)-ncol(pattern)-1)) {
-      subM = M[i:(i-1+nrow(pattern)), j:(j-1+ncol(pattern))];
+  for (i in 1:(nrow(env$M)-nrow(pattern)-1)) {
+    for (j in 1:(ncol(env$M)-ncol(pattern)-1)) {
+      subM = env$M[i:(i-1+nrow(pattern)), j:(j-1+ncol(pattern))];
       if (identical(subM,pattern)) {
         subM[which(subM == 1)] = colNum
-        M[i:(i-1+nrow(pattern)), j:(j-1+ncol(pattern))] = subM;
+        env$M[i:(i-1+nrow(pattern)), j:(j-1+ncol(pattern))] = subM;
       }
     }
   }
-  return(M)
 }
 
 #findPatternMatch_2 from Leila
@@ -229,80 +231,108 @@ getAllPatterns <- function(paths) {
   # für alle paths creatures auslesen und als vector von objekten zurückgeben
   creatures <- list()
   for (i in 1:length(paths)) {
-    creatures[[length(creatures) +1]] <- load.masks(paths[i])
+    creatures[[length(creatures) +1]] <- addRotatedPatterns(load.masks(paths[i]))
   }
   return(creatures);
 }
 
-detectPatterns <- function(M, creatures, colorMapping) {
-  # for (i in c(1:length(creatures))) {
-  # pattern_num = dim(creatures[[i]]$patterns)[3]
-  # if (is.na(pattern_num)) {
-  #   pattern_num = 1
-  # }
-  # for (j in c(1:pattern_num)) {
-  #   col = colorMapping$num[which(colorMapping$col == creatures[[i]]$color)];
-  #   if (pattern_num > 1) {
-  #     M = findPatternMatch(M, creatures[[i]]$patterns[,,j], col);
-  #   } else {
-  #     M = findPatternMatch(M, creatures[[i]]$patterns, col);
-  #   }
-  #   }
-  # }
-
-  for(i in creatures){
-    for(c in i$color){
-      col <- c
-    }
+detectPatterns <- function(env) {
+  for(i in env$creatures){
+    col = env$colorMapping$num[which(env$colorMapping$col == i$color)];
     for(p in i$patterns){
-      pat <- p
-      M = findPatternMatch(M, pat, col);
-      # print(col)
-      # print(pat)
+      findPatternMatch(env, p, col);
     }
   }
-  
-  return(M)
 }
 
-starteSpiel <- function(iter_number, matrix_size, save_path, colorMapping, paths) {
-  M <- createMatrix(matrix_size)
-  patterns <- getAllPatterns(paths)
+createColorMapping <- function(env) {
+  numbers <- c(0,1)
+  colors <- c('white', 'black')
+  
+  for (i in env$creatures) {
+    if (sum(colors == i$color) == 0) {
+      numbers <- union(numbers, numbers[length(numbers)]+1)
+      colors <- union(colors, i$color)    
+    }
+  }
+  env$colorMapping = data.frame(num=numbers, col=colors, stringsAsFactors = FALSE)
+}
+
+rotatePattern90degRight <- function(pattern) {
+  rotatedPattern <- t(pattern[nrow(pattern):1,])
+  return(rotatedPattern)
+}
+
+addRotatedPatterns <- function(creature) {
+  patterns <- creature$patterns
+  for (p in creature$patterns) {
+    pat <- p
+    for( i in 1:3) {
+      pat <- rotatePattern90degRight(pat)
+      patternExists <- FALSE
+      for (existingPat in patterns) {
+        if (identical(pat, existingPat)) {
+          patternExists <- TRUE
+          break()
+        }
+      }
+      if (!patternExists) {
+        patterns <- append(patterns, list(pat))  
+      }
+    }
+  }
+  creature$patterns <- patterns
+  return(creature)
+}
+
+starteSpiel <- function(iter_number, matrix_or_size, save_path, paths) {
+  gameenv <- new.env()
+  
+  if (is.matrix(matrix_or_size)) {
+    gameenv$M <- matrix_or_size
+  } else {
+    gameenv$M <- createMatrix(matrix_or_size)  
+  }
+  
+  gameenv$creatures <- getAllPatterns(paths)
+  gameenv$colorMapping <- createColorMapping(gameenv)
   
   for (i in c(1:iter_number)) { # check if for-Loop correct
-    M = detectPatterns(M, patterns, colorMapping)
+    M = detectPatterns(gameenv)
     
     # zeige M
-    visualise(M, colorMapping);
+    visualise(gameenv, sprintf('Iteration %d', i));
     #Sys.sleep(1);
     
     # speichere M if nötig
     if (i%%1 == 0) {
-      save(M, save_path, i)
+      save(save_path, i)
     }
     
     # setzte M zurück (= entfärben)
-    M = decolorM(M);
+    decolorM(gameenv);
     
     # prüfe wer überlebt hat und update
-    M <- computeAll(M)
+    computeAll(gameenv)
   }
 }
 
 # Spiel starten: 
-#save_path = '/home/selina/Documents/github/tmp' 
-save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
-#save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
+# save_path = '/home/selina/Documents/github/tmp' 
+# save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/game_test'
+# setwd('/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/Projekt/ConwayGame')
+# save_path = 'C:/Users/aftak/Documents/FSU/M.Sc/SS2017/Programmierung mit R/conway_snapshots'
+setwd('/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/uebungen')
+save_path = '/home/te74zej/Dokumente/M.Sc./SS2017/Programmierung  mit R/uebungen/game_snapshots'
 
 path.blinker <- 'color and pattern/blinker.txt'
 path.block <- 'color and pattern/block.txt'
 path.glider <- 'color and pattern/glider.txt'
-#path.fourglidertub <- 'color and pattern/four_glider_tub.txt'
+path.fourglidertub <- 'color and pattern/four_glider_tub.txt'
 path.tub <- 'color and pattern/tub.txt'
 path.test <- 'color and pattern/test.txt'
 paths = array(data=c(path.blinker, path.block, path.glider, path.tub)) #,path.fourglidertub))
 
 
 #--------TEST-------
-colorMapping = data.frame(num=c(0,1,2,3,4,5,6), col=c('white', 'black', '#9bea00', '#ff0000', '#9a32cd', '#00eeee', '#ff9900'), stringsAsFactors = FALSE)
-starteSpiel(100, 100, save_path, colorMapping, paths)
+starteSpiel(100, 100, save_path, paths)
