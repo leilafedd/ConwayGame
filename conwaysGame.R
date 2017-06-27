@@ -94,7 +94,11 @@ computeIsAlive <- function(N) {
   return(0)
 }
 
-
+#' Determines for each cell in Matrix M, if it survives or dies 
+#' and saves updated matrix in R
+#'
+#' @param env Environment containing game matrix: M and dataframe: colorMapping
+#'
 computeAll <- function(env) {
   R <- matrix(data=0, ncol=ncol(env$M), nrow=nrow(env$M))
   
@@ -186,19 +190,14 @@ findPatternMatch_2<-function(mask,M,col)
   return(M)
 }
 
-
+#' Reads a .txt-file containing matrix patterns that ought to be recognized
+#' and saves all patterns in a list of matrices. The object "creature" 
+#' is created wich contains said list and its assigned colour. 
+#'
+#' @param path file path containing the pattern as a .txt-file
+#'
+#' @return an object containing all patterns and assigned colour of given file path
 load.masks <- function(path) {
-  tryCatch({
-    library(abind)
-  }, error = function(e) {
-    install.packages("abind")
-    library(abind)
-  })
-  # Selina:
-  #lese die Datei aus
-  # bsp:
-  # #45fe00
-  # 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
   creature <- {}
   patterns <- {}
   c <- as.integer(scan(file=path, skip =1, nlines = 1, what = "numerical", quiet = TRUE))
@@ -219,14 +218,17 @@ load.masks <- function(path) {
     line.number <- line.number + 1
   }
   close(con)
-  #print(line.number)
   colour <- scan(file=path, nlines =1, comment.char = "", what="character", quiet = TRUE)
   creature$color <- colour
   creature$patterns <- patterns
   return(creature)
 }
 
-
+#' Iterates through list of file paths containing all patterns and saving them in an object called creatures.
+#'
+#' @param paths list of file paths, each containing patterns as a .txt-file
+#'
+#' @return a vector containing objects holding all patterns and assigned colour of each file in paths
 getAllPatterns <- function(paths) {
   # für alle paths creatures auslesen und als vector von objekten zurückgeben
   creatures <- list()
@@ -285,6 +287,14 @@ addRotatedPatterns <- function(creature) {
   return(creature)
 }
 
+#' Main game loop. Manages creation os start matrix and its updating, as well as pattern detection 
+#' and visualization of matrix with each iteration
+#'
+#' @param iter_number number of iterations of the game (life cycles) 
+#' @param matrix_or_size containing either a start matrix for the game of life or the size the start matrix should have
+#' @param save_path path where matrices are saved as images
+#' @param paths list of file paths, each containing patterns as a .txt-file
+#'
 starteSpiel <- function(iter_number, matrix_or_size, save_path, paths) {
   gameenv <- new.env()
   
