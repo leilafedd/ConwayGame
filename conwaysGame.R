@@ -1,4 +1,6 @@
-#' Creates a 3x3 neighbour matrix for a given element
+#' @title get neighbours of a cell
+#' 
+#' @description Creates a 3x3 neighbour matrix for a given element
 #'
 #' @author Selina Müller
 #'
@@ -7,6 +9,10 @@
 #' @param j column index of matrix element
 #'
 #' @return 3x3 matrix of neighbours for an element with given indices
+#' 
+#' @examples
+#' M <- matrix( c(0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0), nrow=15, ncol=15) 
+#' N <- getNeighbours(M, 5,8)
 #' 
 getNeighbours <- function(env, i,j) {
   
@@ -115,12 +121,19 @@ computeIsAlive2 <- function(N) {
 }
 
 
+#' @title Update matrix
+#' 
+#' @description 
 #' Determines for each cell in Matrix M, if it survives or dies 
 #' and saves updated matrix in R
 #' 
 #' @author Selina Müller
 #'
 #' @param env Environment containing game matrix: M and dataframe: colorMapping
+#' 
+#' @example 
+#' M <- matrix( c(0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0), nrow=15, ncol=15) 
+#' R <- computeAll(M)
 #'
 computeAll <- function(env) {
   R <- matrix(data=0, ncol=ncol(env$M), nrow=nrow(env$M))
@@ -268,6 +281,9 @@ findPatternMatch_2<-function(env, mask, col)
   }
 }
 
+#' @title load masks that are saved in a txt-file
+#' 
+#' @description 
 #' Reads a .txt-file containing matrix patterns that ought to be recognized
 #' and saves all patterns in a list of matrices. The object "creature" 
 #' is created wich contains said list and its assigned colour. 
@@ -277,6 +293,9 @@ findPatternMatch_2<-function(env, mask, col)
 #' @param path file path containing the pattern as a .txt-file
 #'
 #' @return an object containing all patterns and assigned colour of given file path
+#' 
+#' @example 
+#' load.masks("C:/Users/me/Documents/ConwayPatterns/glider.txt")
 #' 
 load.masks <- function(path) {
   creature <- {}
@@ -305,6 +324,9 @@ load.masks <- function(path) {
   return(creature)
 }
 
+#' @title Create object that holds all patterns as lists
+#' 
+#' @description 
 #' Iterates through list of file paths containing all patterns and saving them in an object called creatures.
 #'
 #' @author Selina Müller
@@ -312,6 +334,9 @@ load.masks <- function(path) {
 #' @param paths list of file paths, each containing patterns as a .txt-file
 #'
 #' @return a vector containing objects holding all patterns and assigned colour of each file in paths
+#' 
+#' @example 
+#' getAllPatterns("C:/Users/me/Documents/ConwayPatterns/glider.txt", "C:/Users/me/Documents/ConwayPatterns/still.txt")
 #' 
 getAllPatterns <- function(paths) {
   # für alle paths creatures auslesen und als vector von objekten zurückgeben
@@ -406,6 +431,9 @@ addRotatedPatterns <- function(creature) {
   return(creature)
 }
 
+#' @title main game-loop
+#' 
+#' @description 
 #' Main game loop. Manages creation os start matrix and its updating, as well as pattern detection 
 #' and visualization of matrix with each iteration
 #' 
@@ -416,6 +444,9 @@ addRotatedPatterns <- function(creature) {
 #' @param save_path path where matrices are saved as images
 #' @param paths list of file paths, each containing patterns as a .txt-file
 #'
+#' @example 
+#' starteSpiel(iter_number = 10, matrix_or_size = 100, save_path = "C:/Users/me/Documents/ConwayPatterns", paths = c("C:/Users/me/Documents/ConwayPatterns/glider.txt", "C:/Users/me/Documents/ConwayPatterns/still.txt"))
+#' 
 starteSpiel <- function(iter_number, matrix_or_size, save_path, paths) {
   gameenv <- new.env()
   
